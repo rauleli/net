@@ -4,7 +4,8 @@
 
 ## ✨ Features
 - Simple TCP client interface using Tcl's native socket API
-- Non-blocking I/O with `fileevent` callbacks
+- Returns a dedicated namespace as handler for each connection
+- Non-blocking I/O using `fileevent` internally
 - Designed for modular systems (like Rivet-connected or daemon-based flows)
 - No external dependencies
 - Cleanly handles open/send/receive/close logic
@@ -13,31 +14,32 @@
 ## 🔧 Basic Usage
 
 ```tcl
-# Connect to a server
-net::client::connect 127.0.0.1 9000 -command ::myHandler
+# Connect to a server, receive a handler namespace
+set conn [net::client::connect 127.0.0.1 9000]
 
-# Send data
-net::client::send "Hello from Tcl!"
+# Send data through the connection
+$conn send "Hello from Tcl!"
 
-# Close connection
-net::client::close
+# Close the connection
+$conn close
 ```
 
 ## 🧱 Structure
-- `net::client::connect`: Opens a socket and sets up callbacks
-- `net::client::send`: Sends string data through the socket
-- `net::client::close`: Terminates the connection gracefully
+- `net::client::connect`: Opens a socket and returns a handler namespace
+- `$handler send`: Sends string data over the socket
+- `$handler close`: Closes the connection cleanly
 
 ## 🛠️ Customization
-You can pass a custom command to handle incoming data:
+Handlers can be renamed for clarity:
+
 ```tcl
-proc ::myHandler {sock data} {
-    puts "Received: $data"
-}
+set conn [net::client::connect 127.0.0.1 9000]
+rename $conn ::handler
+::handler send "Using a renamed handler"
 ```
 
 ## 📜 License
 MIT (or your preferred open-source license)
 
 ## 🙏 Acknowledgements
-Created to support lightweight interprocess communication in modular Tcl projects, including AeroAlebrije components.
+Created to support lightweight interprocess communication in modular Tcl projects.
